@@ -1,4 +1,4 @@
-<h1 align="center">Hi 👋, I'm JEONG MIN JEONG</h1>
+<h1 align="center">Hi 👋, 안녕하세요 정민정입니다 </h1>
 <h3 align="center">A passionate frontend developer from India</h3>
 
 <h3 align="left">Connect with me:</h3>
