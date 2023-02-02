@@ -3,7 +3,6 @@
 
 ![설명글](https://github-readme-stats.vercel.app/api?username=miniary&count_private=true&theme=vue-dark&show_icons=true)
 
-<h3 align="left">Connect with me:</h3>
 <p align="left">
 </p>
 
