@@ -1,4 +1,4 @@
-<h1 align="center"> 안녕하세요👋, 정민정입니다! </h1>
+<h1 align="center"> 어서오세요👋, 백엔드 개발자 정민정입니다! </h1>
 <h3 align="center"></h3>
 
 ![설명글](https://github-readme-stats.vercel.app/api?username=miniary&count_private=true&theme=vue-dark&show_icons=true)
