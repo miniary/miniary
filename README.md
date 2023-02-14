@@ -5,7 +5,7 @@
 
 개발 또한 제가 보고 사용하던 홈페이지의 개발되는 과정을 배우며
 어느 한 곳 개발자의 손이 미치지 않는 곳이 없다는 것은 저에게 정말 놀랍고 흥미로움을 주었습니다.
-더욱 성장하고 완성도 높은 기능을 만드는 개발자가 되고싶습니다.
+더욱 성장하고 완성도 높은 기능을 만드는 개발자가 되고싶어요!
 
 
 ![설명글](https://github-readme-stats.vercel.app/api?username=miniary&count_private=true&theme=vue-dark&show_icons=true)
