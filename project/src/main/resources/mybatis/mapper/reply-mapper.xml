@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="reply">
+
+	<!-- 게시글 번호 시퀀스 -->
+	<select id="sequence" resultType="int">
+		SELECT reply_seq.nextval FROM DUAL
+	</select>
+	
+	<!-- 댓글 조회 -->
+	<select id="list" parameterType="int" resultType="ReplyVO">
+		SELECT R.*
+		      ,M.mem_nick FROM REPLY R
+		INNER JOIN MEM M
+		ON R.reply_writer = M.mem_no
+		WHERE board_no = #{boardNo}
+		ORDER BY reply_writetime
+	</select>
+	
+	<!-- 댓글 작성 -->
+	<insert id="insert" parameterType="ReplyDto">
+		INSERT INTO REPLY (reply_no
+                          ,reply_writer
+                          ,board_no
+                          ,reply_content)
+          		   VALUES (#{replyNo}
+             			  ,#{replyWriter}
+             		      ,#{boardNo}
+             		      ,#{replyContent})
+	</insert>
+	
+	<!-- 댓글 수정 -->
+	<update id="edit" parameterType="ReplyDto">
+		UPDATE REPLY SET reply_content = #{replyContent}
+	     WHERE reply_no = #{replyNo}
+	</update>
+	
+	<!-- 댓글 삭제 -->
+	<delete id="delete" parameterType="int">
+		DELETE REPLY WHERE reply_no = #{replyNo}
+	</delete>
+	
+ 	<!-- 글 상세 조회 -->
+<!-- 	<select id="one" parameterType="int" resultType="BoardVO"> -->
+<!-- 				SELECT B.board_no -->
+<!-- 		              ,B.board_head -->
+<!-- 		              ,B.board_title -->
+<!-- 		              ,B.board_content -->
+<!-- 		              ,B.board_writetime -->
+<!-- 		              ,B.board_read -->
+<!-- 		              ,B.reply_count -->
+<!-- 		              ,M.mem_nick FROM BOARD B -->
+<!-- 				INNER JOIN MEM M -->
+<!-- 				ON B.board_writer = M.mem_no -->
+<!-- 				WHERE B.board_no = #{boardNo} -->
+<!-- 	</select> -->
+	
+	
+</mapper>

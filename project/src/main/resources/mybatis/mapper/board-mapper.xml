@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="board">
+
+	<!-- 게시글 번호 시퀀스 -->
+	<select id="sequence" resultType="int">
+		SELECT board_seq.nextval FROM DUAL
+	</select>
+		
+	<!-- 목록 게시글 갯수 -->
+	<select id="listCount" resultType="int">
+		SELECT COUNT(*) FROM BOARD
+	</select>
+	
+	<!-- 검색 게시글 갯수 -->
+	<select id="searchCount" parameterType="BoardListSearchVO" resultType="int">
+		SELECT COUNT(*) FROM BOARD B 
+		 INNER JOIN MEM M 
+		         ON B.board_writer = M.mem_no 
+		      WHERE 
+			   <choose>
+			      <when test="type=='board_head'.toString()">
+				 	INSTR(board_head,#{keyword})>0
+			      </when>
+			      <when test="type='board_title'.toString()">
+				    INSTR(board_title,#{keyword})>0 
+			      </when>
+			      <when test="type='board_content'.toString()">
+				    INSTR(board_content,#{keyword})>0			                     	
+			      </when>
+			      <when test="type='board_writer'.toString()">
+				    INSTR(mem_nick,#{keyword})>0
+			      </when>
+			   </choose>		      
+	</select>
+	
+ 	<!-- 목록 조회 -->
+ 	<resultMap id="list_map" type="BoardVO">
+ 		<result property="boardNo" column="board_no"/>
+ 		<result property="boardHead" column="board_head"/>
+ 		<result property="boardTitle" column="board_title"/>
+ 		<result property="memNick" column="mem_nick"/>
+ 		<result property="boardWriteTime" column="board_writetime"/>
+ 		<result property="boardRead" column="board_read"/>
+ 		<result property="replyCount" column="reply_count"/>
+ 	</resultMap>
+ 	
+<!-- 	<select id="list" parameterType="BoardListSearchVO" resultType="BoardVO"> -->
+	<select id="list" parameterType="BoardListSearchVO" resultMap="list_map">
+			SELECT * FROM
+			        (SELECT ROWNUM RN, TMP.* FROM
+			                (SELECT  DISTINCT B.board_no 
+                                             ,B.board_head
+                                             ,B.board_title
+                                             ,B.board_writetime
+                                             ,B.board_read
+                                             ,COUNT(R.reply_no) OVER(PARTITION BY B.board_no) reply_count
+                                             ,M.mem_nick
+			                   FROM BOARD B
+			              LEFT JOIN REPLY R  
+			                     ON B.board_no = R.board_no 
+			              LEFT JOIN MEM M
+			                     ON B.board_writer = M.mem_no ORDER BY B.board_no DESC)TMP)
+			 WHERE RN BETWEEN #{startRow} AND #{endRow}
+	</select>
+	
+	<!-- 검색 조회 -->
+	<select id="search" parameterType="BoardListSearchVO" resultMap="list_map">
+			SELECT * FROM
+			        (SELECT ROWNUM RN, TMP.* FROM
+			                (SELECT DISTINCT B.board_no 
+                                            ,B.board_head
+                                            ,B.board_title
+                                            ,B.board_writetime
+                                            ,B.board_read
+			                                ,COUNT(R.reply_no) OVER(PARTITION BY B.board_no) reply_count
+			                                ,M.mem_nick
+			                   FROM BOARD B
+			              LEFT JOIN REPLY R  
+			                     ON B.board_no = R.board_no 
+			              LEFT JOIN MEM M
+			                     ON B.board_writer = M.mem_no 
+			                     WHERE
+			                     <choose>
+			                     	<when test="type=='board_head'.toString()">
+					                    INSTR(board_head,#{keyword})>0
+			                     	</when>
+			                     	<when test="type='board_title'.toString()">
+				                        INSTR(board_title,#{keyword})>0 
+			                     	</when>
+			                     	<when test="type='board_content'.toString()">
+				                        INSTR(board_content,#{keyword})>0			                     	
+			                     	</when>
+			                     	<when test="type='board_writer'.toString()">
+				                        INSTR(mem_nick,#{keyword})>0
+			                     	</when>
+			                     </choose>
+			                     ORDER BY B.board_no DESC)TMP)
+			 WHERE RN BETWEEN #{startRow} AND #{endRow}
+	</select>
+	
+	<resultMap id="write_map" type="BoardDto">
+ 		<result property="boardNo" column="board_no"/>
+ 		<result property="boardWriter" column="board_writer"/>
+ 		<result property="boardHead" column="board_head"/>
+ 		<result property="boardTitle" column="board_title"/>
+ 		<result property="boardContent" column="board_content" jdbcType="CLOB" javaType="java.lang.String" />
+ 	</resultMap>
+	<!-- 글 작성 -->
+	<insert id="insert" parameterType="BoardDto">
+		INSERT INTO BOARD (board_no
+                          ,board_writer
+                          ,board_head
+                          ,board_title
+                          ,board_content) 
+          		   VALUES (#{boardNo}
+             			  ,#{boardWriter}
+             		      ,#{boardHead}
+             		      ,#{boardTitle}
+             		      ,#{boardContent})
+	</insert>
+	
+	<!-- 글 파일 첨부 -->
+	<insert id="insertAttach" parameterType="BoardAttachDto">
+		INSERT INTO BOARD_ATTACH (board_no
+                        		  ,attach_no) 
+		          		   VALUES (#{boardNo}
+		             			  ,#{attachNo})
+	</insert>
+	
+	
+	 <resultMap id="post_map" type="BoardVO">
+ 		<result property="boardNo" column="board_no"/>
+ 		<result property="boardHead" column="board_head"/>
+ 		<result property="boardTitle" column="board_title"/>
+ 		<result property="memNick" column="mem_nick"/>
+ 		<result property="boardWriteTime" column="board_writetime"/>
+ 		<result property="boardRead" column="board_read"/>
+ 		<result property="replyCount" column="reply_count"/>
+ 		<result property="boardContent" column="board_content" jdbcType="CLOB" javaType="java.lang.String" />
+ 	</resultMap>
+	<!-- 글 상세 조회 -->
+	<select id="one" parameterType="Map" resultMap="post_map">
+				SELECT  B.board_no
+				       ,B.board_head
+				       ,B.board_title
+				       ,B.board_content
+				       ,B.board_writetime
+				       ,B.board_read
+				       ,COUNT(R.reply_no) OVER(PARTITION BY B.board_no) reply_count
+				       ,M.mem_nick FROM BOARD B
+				INNER JOIN MEM M
+				ON B.board_writer = M.mem_no
+			    LEFT JOIN REPLY R  
+			    ON B.board_no = R.board_no 				
+				WHERE B.board_no = #{boardNo}
+	</select>
+	
+	<!-- 글 조회수 -->
+	<update id="read" parameterType="int">
+		UPDATE BOARD SET board_read = board_read + 1
+		 WHERE board_no = #{boardNo}
+	</update>
+	
+	<!-- 글 파일 조회 -->
+	<select id="findAttach" parameterType="int" resultType="AttachDto">
+		   	SELECT A.attach_no
+	              ,A.attach_name
+	              ,A.attach_type
+	              ,A.attach_size
+	              ,A.attach_time FROM ATTACH A
+			INNER JOIN BOARD_ATTACH B
+			ON A.attach_no = B.attach_no
+			WHERE B.board_no = #{boardNo}
+	</select>
+	
+	<!-- 글 수정 -->
+	<update id="edit" parameterType="BoardDto">
+		UPDATE BOARD SET board_head = #{boardHead}
+					   , board_title = #{boardTitle}
+					   , board_content = #{boardContent} 
+	     WHERE board_no = #{boardNo}
+	</update>
+	
+	<!-- 글 삭제 -->
+	<delete id="delete" parameterType="int">
+		DELETE BOARD WHERE board_no = #{boardNo}
+	</delete>
+	
+	
+</mapper>

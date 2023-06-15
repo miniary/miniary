@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="mem">
+
+	<!-- 회원번호 시퀀스 -->
+	<select id="sequence" resultType="int">
+		SELECT mem_seq.nextval FROM DUAL
+	</select>
+	
+	<!-- 회원가입 -->
+	<insert id="join" parameterType="MemDto">
+		INSERT INTO MEM( mem_no
+						,mem_id
+						,mem_pw
+						,mem_nick
+						,mem_birth)
+			   VALUES ( #{memNo}
+			  		   ,#{memId}
+			  		   ,#{memPw}
+			  		   ,#{memNick}
+			  		   ,#{memBirth})
+	</insert>
+
+	<!-- 단일 조회 - 회원 번호 -->
+	<select id="one" parameterType="int" resultType="MemDto" >
+		SELECT * FROM MEM WHERE mem_no = #{memNo}
+	</select>
+	
+	<!-- 단일 조회 - 회원 아이디 -->
+	<select id="id" parameterType="String" resultType="MemDto">
+		SELECT * FROM MEM WHERE mem_id = #{memId}
+	</select>
+	
+	<!-- 단일 조회 - 회원 닉네임 -->
+	<select id="nick" parameterType="String" resultType="MemDto">
+		SELECT * FROM MEM WHERE mem_nick = #{memNick}
+	</select>
+	
+	<!-- 프로필 수정 -->
+	<update id="profile" parameterType="MemDto">	
+		UPDATE MEM SET
+			mem_nick = #{memNick}, 
+			mem_birth = #{memBirth}
+		WHERE mem_no = #{memNo}
+	</update>
+	
+	<!-- 프로필 이미지 첨부 -->
+	<insert id="insertProfile" parameterType="ProfileAttachDto">
+		INSERT INTO PROFILE_ATTACH VALUES(#{attachNo}, #{memNo})
+	</insert>
+	
+	<!-- 프로필 이미지 조회 -->
+	<select id="findProfile" parameterType="int" resultType="AttachDto">
+		SELECT * FROM PROFILE_ATTACH WHERE mem_no = #{memNo} ORDER BY attach_no
+	</select>
+	
+	<!-- 프로필 이미지 삭제 -->
+	<delete id="deleteProfile" parameterType="int">
+		DELETE FROM PROFILE_ATTACH WHERE mem_no = #{memNo}
+	</delete>
+	
+	<!-- 비밀번호 재설정 -->
+	<update id="pw" parameterType="MemDto">
+		UPDATE MEM SET
+			mem_pw = #{memPw}
+		WHERE mem_no = #{memNo}
+	</update>
+	
+	<!-- 비밀번호 재설정 전 개인정보 조회 -->
+	<select id="infoCheck" parameterType="MemDto" resultType="MemDto">
+		SELECT * FROM MEM WHERE mem_id = #{memId} AND mem_nick = #{memNick} AND mem_birth = #{memBirth} 
+	</select>
+</mapper>
